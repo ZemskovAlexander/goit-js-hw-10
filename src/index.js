@@ -1,68 +1,56 @@
 import './css/styles.css';
-import axios from 'axios';
 import debounce from 'lodash.debounce';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { fetchCountries } from './js/fetchCountries';
+import {
+  renderCountriesList,
+  redrerCountryFinded,
+  clearCountryList,
+  clearCountryFinded,
+  showLoader,
+  hideLoader,
+} from './js/rendersFunctions';
 
 const DEBOUNCE_DELAY = 300;
+const input = document.querySelector('[id="search-box"]');
 
-axios.defaults.baseURL = `https://restcountries.com/v3.1/name/`;
+let name;
 
-const refs = {
-  form: document.querySelector('.search-input'),
-  list: document.querySelector('.country-list'),
-  info: document.querySelector('.country-info'),
-};
+input.addEventListener('input', debounce(searchCountry, DEBOUNCE_DELAY));
 
-let items = [];
-let query = '';
+function searchCountry(e) {
+  name = e.target.value.trim();
 
-const fetchData = () => {
-  isLoading = true;
-  loaderOn();
+  if (name.length === 0) {
+    clearCountryList();
+    clearCountryFinded();
+  } else {
+    clearCountryFinded();
 
-  axios
-    .get(`${query}`)
-    .then(({ data }) => {
-      items = [...items, data.hits];
-      totalPages = data.nbPages;
-      renderList(data.hits);
-      // renderButtons();
-    })
-    .catch(error => console.log(error.message))
-    .finally(() => {
-      loaderOff();
-      isLoading = false;
-    });
-};
+    showLoader();
 
-const handleSubmit = e => {
-  e.preventDefault();
+    fetchCountries(name)
+      .then(countries => {
+        if (countries.length > 10) {
+          clearCountryList();
+          Notify.info(
+            'Too many matches found. Please enter a more specific name.'
+          );
+          return;
+        }
 
-  if (query === e.target.elements.query.value) return;
+        if (countries.length > 1) {
+          renderCountriesList(countries);
+          return;
+        }
 
-  query = e.target.elements.query.value;
-  refs.list.innerHTML = '';
-  currentPage = 0;
-  items = [];
-
-  if (!query) return;
-
-  fetchData();
-};
-
-const render = () => {
-  console.log(items);
-};
-
-// const tapCuntry = _.debounce(onSearch, 300);
-
-refs.form.addEventListener('input', handleSubmit);
-
-// function onSearch(evt) {
-//   evt.preventDefault();
-
-//   searchQuery = evt.target.elements.query.value;
-
-//   fetch(`https://restcountries.com/v3.1/name/${searchQuery}`)
-//     .then(r => r.json())
-//     .then(console.log);
-// }
+        if (countries.length === 1) {
+          redrerCountryFinded(countries);
+          return;
+        }
+      })
+      .finally(() => {
+        hideLoader();
+      });
+  }
+}

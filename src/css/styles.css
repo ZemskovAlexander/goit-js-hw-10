@@ -18,3 +18,50 @@ body {
   max-width: 320px;
   margin-bottom: 16px;
 }
+
+input {
+  width: 310px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin: 5px;
+}
+
+.country-list li {
+  font-size: 24px;
+}
+
+.country-name {
+  display: flex;
+  align-items: center;
+  font-size: x-large;
+}
+
+h2 {
+  margin: 0 0 0 10px;
+}
+
+.country-desc {
+  font-size: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.country-desc span {
+  font-weight: bold;
+}
+
+.loader {
+  font-weight: bold;
+  display: none;
+}
+
+.show {
+  display: block;
+}
